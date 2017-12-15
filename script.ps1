@@ -27,6 +27,7 @@
 		 	-creplace "enabled" , "mouseEnabled" `
 		 	-replace "buttonMode=true", 'cursor="pointer"' `
 		 	-replace "buttonMode=false", 'cursor="null"' `
+		 	-replace "extends", "" `
 		 	-replace '.*import(.+)', '' `
 		 	-replace '.*package(.+)', '' 
 		} | Set-Content modifiedScript.js
@@ -38,3 +39,7 @@ $content[-1] = $content[-1] -replace '^(.*).$', "`$1$replaceCharacter"
 $content | Set-Content $dest
 
 
+$l1 = Get-Content $dest | Where-Object {$_ -like '*class*'}
+$arr = $l1 -split ' '
+$n1 = "function "+ $arr[1] + "() " +$arr[2]
+(Get-Content $dest)  -creplace $l1, $n1  | Set-Content $dest
