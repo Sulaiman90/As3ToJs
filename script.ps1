@@ -1,14 +1,18 @@
-(Get-Content sample.as) | ForEach-Object {
+$source = "sample.as"
+$dest = "modifiedScript.js"
+
+(Get-Content $source) | ForEach-Object {
 		 $_ -creplace "private" , "" `
 		 	-creplace "public" , "" `
 		 	-replace ":Array = new Array" , "=[]" `
 		 	-creplace ":MovieClip" , "" `
 		 	-creplace "MovieClip" , "" `
 			-replace ":.*?(=)", '='	`
-			-replace ":.*?(void)", ''	`
 			-creplace ":Boolean" , "" `
+			-creplace ":void" , "" `
 			-creplace ":Number" , "" `
 			-creplace ":String" , "" `
+			-creplace ":Array" , "" `
 		 	-creplace "FocusEvent.FOCUS_IN" , '"focusin"' `
 		 	-creplace "FocusEvent.FOCUS_OUT" , '"focusout"' `
 		 	-creplace 'gotoAndStop', 'gotoAndStopFrame' `
@@ -26,20 +30,17 @@
 		 	-creplace '.*playFbSound', "playFbSound" `
 		 	-creplace '.*playSnapSound', 'playSnapSound' `
 		 	-creplace "enabled" , "mouseEnabled" `
+		 	-creplace "currentFrameLabel" , "currentLabel" `
 		 	-replace "buttonMode=true", 'cursor="pointer"' `
 		 	-replace "buttonMode=false", 'cursor="null"' `
 		 	-replace "extends", "" `
 		 	-replace '.*import(.+)', '' `
 		 	-replace '.*package(.+)', '' 
-		} | Set-Content modifiedScript.js
+		} | Set-Content $dest
 
-$dest = "modifiedScript.js"
 $raw = Get-Content -Path $dest | Out-String
 [void]($raw -match "(?m)^(\s+)class")
 $leadingSpacesToRemove = $Matches[1].Length
 $raw -replace "(?sm).*?class (\w+)(.*)}",'function $1()$2' -replace "(?m)^\s{$leadingSpacesToRemove}" | Set-Content $dest
 
-(Get-Content $dest) | ForEach-Object { 
-		$_ 	-creplace 'gotoAndStopFrame\("', 'gotoAndStop("'
-} | Set-Content $dest
-
+(Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest

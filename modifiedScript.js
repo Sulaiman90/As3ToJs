@@ -4,7 +4,7 @@ function l1917SimpleCheck()   {
 		 var prevcorr=0;
 		 var trials;
 		 var mainStage;
-		 function l1917SimpleCheck(mov,a {
+		 function l1917SimpleCheck(mov,a) {
 			trace(a,mov);
 			ans_ar=a;
 			mc=mov;
@@ -88,7 +88,7 @@ playFbSound("wrong");
 				mc.feedback_mc.gotoAndStop("please");
 
 			}
-playFbSound(mc.feedback_mc.currentFrameLabel);
+playFbSound(mc.feedback_mc.currentLabel);
 			prevcorr=corr;
 		}
 		 function focus_fn(e) {
