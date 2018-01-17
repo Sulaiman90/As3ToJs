@@ -9,6 +9,8 @@ $dest = "modifiedScript.js"
 		 	-creplace "MovieClip" , "" `
 			-replace ":.*?(=)", '='	`
 			-creplace ":Boolean" , "" `
+			-creplace ":uint" , "" `
+			-creplace ":int" , "" `
 			-creplace ":void" , "" `
 			-creplace ":Number" , "" `
 			-creplace ":String" , "" `
@@ -23,6 +25,7 @@ $dest = "modifiedScript.js"
 			-creplace ":Event" , "" `
 			-creplace ":MouseEvent" , ""  `
 			-creplace ":TextEvent" , ""  `
+			-creplace ":FocusEvent" , ""  `
 			-replace '.*stopSound', "stopSound" `
 		 	-creplace '.*stopFbSound', "stopFbSound" `
 		 	-creplace '.*stopSnapSound', "stopSnapSound" `
@@ -33,9 +36,7 @@ $dest = "modifiedScript.js"
 		 	-creplace "currentFrameLabel" , "currentLabel" `
 		 	-replace "buttonMode=true", 'cursor="pointer"' `
 		 	-replace "buttonMode=false", 'cursor="null"' `
-		 	-replace "extends", "" `
-		 	-replace '.*import(.+)', '' `
-		 	-replace '.*package(.+)', '' 
+		 	-replace '.*import(.+)', '' 
 		} | Set-Content $dest
 
 $raw = Get-Content -Path $dest | Out-String
@@ -44,3 +45,5 @@ $leadingSpacesToRemove = $Matches[1].Length
 $raw -replace "(?sm).*?class (\w+)(.*)}",'function $1()$2' -replace "(?m)^\s{$leadingSpacesToRemove}" | Set-Content $dest
 
 (Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest
+
+(Get-Content $dest | Out-String) -replace '(?s)extends.*?{' , '{' | Set-Content $dest
