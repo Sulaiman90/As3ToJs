@@ -1,7 +1,22 @@
 $source = "sample.as"
 $dest = "modifiedScript.js"
 
-(Get-Content $source) | ForEach-Object {
+$file = Get-Content $source | Out-String
+
+#Get content from file
+
+#Regex pattern to compare two strings
+$pattern = "class(.*?)extends"
+
+#Perform the operation
+$result = [regex]::Match($file,$pattern).Groups[1].Value.trim()
+
+#echo "name: $result" 
+
+#Replace the class constructor
+$file -replace "function $result" , "this.$result = function" | Set-Content $dest
+
+(Get-Content $dest | Out-String) | ForEach-Object {
 		 $_ -creplace "private" , "" `
 		 	-creplace "public" , "" `
 		 	-replace ":Array = new Array" , "=[]" `
@@ -36,7 +51,8 @@ $dest = "modifiedScript.js"
 		 	-creplace "currentFrameLabel" , "currentLabel" `
 		 	-replace "buttonMode=true", 'cursor="pointer"' `
 		 	-replace "buttonMode=false", 'cursor="null"' `
-		 	-replace '.*import(.+)', '' 
+		 	-replace '.*import(.+)', '' `
+			-replace '(?s)extends.*?{' , '{'
 		} | Set-Content $dest
 
 $raw = Get-Content -Path $dest | Out-String
@@ -45,5 +61,3 @@ $leadingSpacesToRemove = $Matches[1].Length
 $raw -replace "(?sm).*?class (\w+)(.*)}",'function $1()$2' -replace "(?m)^\s{$leadingSpacesToRemove}" | Set-Content $dest
 
 (Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest
-
-(Get-Content $dest | Out-String) -replace '(?s)extends.*?{' , '{' | Set-Content $dest
