@@ -1,9 +1,8 @@
 $source = "sample.as"
 $dest = "modifiedScript.js"
 
-$file = Get-Content $source | Out-String
-
 #Get content from file
+$file = Get-Content $source | Out-String
 
 #Regex pattern to compare two strings
 $pattern = "class(.*?)extends"
@@ -14,7 +13,7 @@ $result = [regex]::Match($file,$pattern).Groups[1].Value.trim()
 #echo "name: $result" 
 
 #Replace the class constructor
-$file -replace "function $result" , "this.$result = function" | Set-Content $dest
+$file -replace "function $result\(" , "this.$result = function(" | Set-Content $dest
 
 (Get-Content $dest | Out-String) | ForEach-Object {
 		 $_ -creplace "private" , "" `
