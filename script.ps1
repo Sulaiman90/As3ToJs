@@ -1,5 +1,5 @@
-$source = "sample.as"
-$dest = "modifiedScript.js"
+$source = "toConvert.as"
+$dest = "Converted.js"
 
 #Get content from file
 $file = Get-Content $source | Out-String
@@ -18,7 +18,8 @@ $file -replace "function $result\(" , "this.$result = function(" | Set-Content $
 (Get-Content $dest | Out-String) | ForEach-Object {
 		 $_ -creplace "private" , "" `
 		 	-creplace "public" , "" `
-		 	-replace ":Array = new Array" , "=[]" `
+		 	-creplace ":Array = new Array\(\)" , "=[]" `
+		 	-creplace ":Array = new Array" , "=[]" `
 		 	-creplace ":MovieClip" , "" `
 		 	-creplace "MovieClip" , "" `
 			-replace ":.*?(=)", '='	`
