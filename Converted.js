@@ -23,11 +23,11 @@ function MainFillSimple() {
 				mainAct["q"+i].visible=false;
 				var txt=mainAct["q"+i].txt;
 				setTextFormat(txt,finalAns[i-1]);
-				txt.addEventListener(TextEvent.TEXT_INPUT, checkBeforeAdding);
+				txt.addEventListener("change", checkBeforeAdding);
 				txt.addEventListener("focusin",onSetFocusFn);
 				txt.addEventListener("focusout",onKillFocusFn);
 				mainAct["q"+i].tick.gotoAndStopFrame(3);
-				//mainAct["q"+i].tick.gotoAndStop("none");
+				mainAct["q"+i].tick.gotoAndStop("none");
 				mainAct["q"+i].attempCnt=0;
 				mainAct["q"+i].chkAlpha=1;
 				mainAct["q"+i].solutionVisible=false;

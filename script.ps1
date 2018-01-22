@@ -32,6 +32,7 @@ $file -replace "function $result\(" , "this.$result = function(" | Set-Content $
 			-creplace ":Array" , "" `
 		 	-creplace "FocusEvent.FOCUS_IN" , '"focusin"' `
 		 	-creplace "FocusEvent.FOCUS_OUT" , '"focusout"' `
+		 	-creplace "TextEvent.TEXT_INPUT" , '"change"' `
 		 	-creplace 'gotoAndStop', 'gotoAndStopFrame' `
 		 	-creplace "gotoAndPlay" , "gotoAndPlayFrame" `
 		 	-creplace "MouseEvent.CLICK" , '"click"' `

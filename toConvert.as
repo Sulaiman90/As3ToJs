@@ -33,7 +33,7 @@
 				txt.addEventListener(FocusEvent.FOCUS_IN,onSetFocusFn);
 				txt.addEventListener(FocusEvent.FOCUS_OUT,onKillFocusFn);
 				mainAct["q"+i].tick.gotoAndStop(3);
-				//mainAct["q"+i].tick.gotoAndStop("none");
+				mainAct["q"+i].tick.gotoAndStop("none");
 				mainAct["q"+i].attempCnt=0;
 				mainAct["q"+i].chkAlpha=1;
 				mainAct["q"+i].solutionVisible=false;
