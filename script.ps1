@@ -4,13 +4,21 @@ $dest = "Converted.js"
 #Get content from file
 $file = Get-Content $source | Out-String
 
-#Regex pattern to compare two strings
-$pattern = "class(.*?)extends"
+#Regex pattern to compare two strings when extends used
+$pattern = "(?s)class(.*?){"
 
 #Perform the operation
-$result = [regex]::Match($file,$pattern).Groups[1].Value.trim()
+$resultStr = [regex]::Match($file,$pattern).Groups[1].Value.trim()
 
-#echo "name: $result" 
+echo "name: $resultStr" 
+
+#split the line and get class name
+$className = $resultStr -split ' '
+
+#assign the class name
+$result = $className[0]
+
+echo "name: $result" 
 
 #Replace the class constructor
 $file -replace "function $result\(" , "this.$result = function(" | Set-Content $dest
@@ -22,7 +30,7 @@ $file -replace "function $result\(" , "this.$result = function(" | Set-Content $
 		 	-creplace ":Array = new Array" , "=[]" `
 		 	-creplace ":MovieClip" , "" `
 		 	-creplace "MovieClip" , "" `
-			-replace ":.*?(=)", '='	`
+			 -replace ":.*?(=)", '='	`
 			-creplace ":Boolean" , "" `
 			-creplace ":uint" , "" `
 			-creplace ":int" , "" `
@@ -38,6 +46,7 @@ $file -replace "function $result\(" , "this.$result = function(" | Set-Content $
 		 	-creplace "MouseEvent.CLICK" , '"click"' `
 			-creplace "MouseEvent.MOUSE_DOWN" , '"mousedown"' `
 			-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
+			-creplace ":Error" , "" `
 			-creplace ":Event" , "" `
 			-creplace ":MouseEvent" , ""  `
 			-creplace ":TextEvent" , ""  `
@@ -47,13 +56,14 @@ $file -replace "function $result\(" , "this.$result = function(" | Set-Content $
 		 	-creplace '.*stopSnapSound', "stopSnapSound" `
 		 	-creplace '.*playSound', "playSound" `
 		 	-creplace '.*playFbSound', "playFbSound" `
-		 	-creplace '.*playSnapSound', 'playSnapSound' `
+		 	-creplace '.*playSnapSound', 'playSound' `
 		 	-creplace "enabled" , "mouseEnabled" `
 		 	-creplace "currentFrameLabel" , "currentLabel" `
 		 	-replace "buttonMode=true", 'cursor="pointer"' `
 		 	-replace "buttonMode=false", 'cursor="null"' `
 		 	-replace '.*import(.+)', '' `
-			-replace '(?s)extends.*?{' , '{'
+			-replace '(?s)extends.*?{' , '{' `
+			-creplace "=new TextFormat" , "" 
 		} | Set-Content $dest
 
 $raw = Get-Content -Path $dest | Out-String

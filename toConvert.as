@@ -2,392 +2,416 @@
 	import flash.display.*;
 	import flash.events.*;
 	import flash.text.*;
-	import flash.geom.Rectangle;
-	public class MainFillSimple extends MovieClip
+	public class AdditionWithoutCarryOver extends Main
 	{
-		private var mainAct:MovieClip;
-		private var finalAns:Array = new Array();
-		private var solution:Array = new Array();
-		private var wrng=0;
-		private var obj;
-		private var wrongOut=0;
-		private var pointer=1;
-		private var totalQuest=0;
-		private var intx;
-		private var inty;
-		private var allDone:Boolean=false;
-		public function MainFillSimple(mv,ans,sol) {
-			trace("innn23");
-			mainAct=mv;
-			finalAns=ans;
-			solution=sol;
-			totalQuest=finalAns.length;
-			MovieClip(mainAct.parent).complete = 0
-			trace(mv.name);
-			for (var i=1; i<=totalQuest; i++) {
-				trace("innn " + mainAct["q"+i]);
-				mainAct["q"+i].visible=false;
-				var txt=mainAct["q"+i].txt;
-				setTextFormat(txt,finalAns[i-1]);
-				txt.addEventListener(TextEvent.TEXT_INPUT, checkBeforeAdding);
-				txt.addEventListener(FocusEvent.FOCUS_IN,onSetFocusFn);
-				txt.addEventListener(FocusEvent.FOCUS_OUT,onKillFocusFn);
-				mainAct["q"+i].tick.gotoAndStop(3);
-				mainAct["q"+i].tick.gotoAndStop("none");
-				mainAct["q"+i].attempCnt=0;
-				mainAct["q"+i].chkAlpha=1;
-				mainAct["q"+i].solutionVisible=false;
-				mainAct["q"+i].chkEnable=true;
+		var mainMov:MovieClip;
+		var addend1=[];
+		var addend2=[];
+		var carry=[];
+		var answerRow=[];
+		var carryOver=1;
+		var pageNumber=0;
+		var digLength=7;
+		var answer=0;
+		var hintLen=0;
+		var hintPosX=0;
+		var textFormat1:TextFormat=new TextFormat  ;
+		var textFormat2:TextFormat=new TextFormat  ;
+		//
+		public function AdditionWithoutCarryOver(mc) {
+			mainMov=mc;
+			mainMov.next_btn.addEventListener(MouseEvent.CLICK,next_fn);
+			mainMov.nextDummy_btn.addEventListener(MouseEvent.CLICK,setQuestion);
+			mainMov.check_btn.addEventListener(MouseEvent.CLICK,check_fn);
+			mainMov.hint_mc.hide_btn.addEventListener(MouseEvent.CLICK,hideHint_fn);
+			mainMov.hint_mc.show_btn.addEventListener(MouseEvent.CLICK,showHint_fn);
+			mainMov.activity.hint_mc.carry_mc.visible=false;
+			mainMov.activity.hint_mc.done_btn.addEventListener(MouseEvent.CLICK,done_fn);
+			mainMov.activity.hint_mc.next_btn.addEventListener(MouseEvent.CLICK,hintNext_fn);
+			mainMov.hintPosX=mainMov.activity.hint_mc.x;
+			textFormat1.color=0xCCCCCC;
+			textFormat2.color=0x000000;
+			for (var i=1; i<=digLength+1; i++) {
+				mainMov.activity["a"+i].text="?";
+				mainMov.activity["a"+i].maxChars=1;
+				mainMov.activity["a"+i].restrict="0-9";
+				mainMov.activity["a"+i].addEventListener(FocusEvent.FOCUS_IN,onSetFocus_fn);
+				mainMov.activity["a"+i].addEventListener(FocusEvent.FOCUS_OUT,onKillFocus_fn);
+				mainMov.activity["a"+i].defaultTextFormat=textFormat1;
 			}
-			trace("innn2");
-			mainAct.next_btn.mouseChildren=false;
-			mainAct.next_btn.buttonMode=true;
-			mainAct.prev_btn.mouseChildren=false;
-			mainAct.prev_btn.buttonMode=true;
-			mainAct.check_btn.mouseChildren=false;
-			mainAct.check_btn.buttonMode=true;
-			mainAct.solution_btn.mouseChildren=false;
-			mainAct.solution_btn.buttonMode=true;
-			trace("innn3");
-			//
-			mainAct.next_btn.addEventListener(MouseEvent.CLICK,nextFn);
-			mainAct.prev_btn.addEventListener(MouseEvent.CLICK,prevFn);
-			mainAct.q1.visible=true;
-			mainAct.solution_mc.visible=false;
-			mainAct.solution_btn.visible=false;
-			mainAct.check_btn.addEventListener(MouseEvent.CLICK,checkFn);
-			mainAct.solution_btn.addEventListener(MouseEvent.CLICK,solutionFn);
-			mainAct.solution_mc.drager.addEventListener(MouseEvent.MOUSE_DOWN,solutionDragFn);
-			mainAct.solution_mc.close_btn.addEventListener(MouseEvent.CLICK,closeSolutionFn);
-			//
-			//mainAct.solution_mc.solloader.mc.scrollDrag=true;
-			mainAct.solution_mc.solloader.mc.addEventListener(Event.REMOVED_FROM_STAGE, stageRemovedFn);
-			//
-			mainAct.next_btn.alpha=1;
-			mainAct.prev_btn.alpha=.5;
-			mainAct.next_btn.mouseEnabled=true;
-			mainAct.prev_btn.mouseEnabled=false;
-			//
-			mainAct.solution_mc.px=mainAct.solution_mc.x;
-			mainAct.solution_mc.py=mainAct.solution_mc.y;
-			intx=mainAct.solution_mc.getRect(mainAct.parent).x;
-			inty=mainAct.solution_mc.getRect(mainAct.parent).y;
-			intx=mainAct.solution_mc.x-intx;
-			inty=mainAct.solution_mc.y-inty;
-			trace("intx "+ intx +  " inty"+ inty);
-			MovieClip(mainAct.parent).result_mc.gotoAndStop(5)
+			if (carryOver==1) {
+				for (i=1; i<=digLength; i++) {
+					mainMov.activity["c"+i].text="";
+					mainMov.activity["c"+i].maxChars=1;
+					mainMov.activity["c"+i].restrict="0-9";
+					mainMov.activity["c"+i].addEventListener(FocusEvent.FOCUS_IN,onSetFocusCarry_fn);
+					mainMov.activity["c"+i].addEventListener(FocusEvent.FOCUS_OUT,onKillFocusCarry_fn);
+				}
+			}
+			setQuestion();
 		}
-		
-		function checkBeforeAdding(evt:TextEvent) {
-			if(evt.text == "." && evt.target.text.indexOf(".") != -1) {
-				evt.preventDefault();
+		//
+		private function done_fn(evt:Event) {
+			mainMov.hint_mc.hide_btn.visible=false;
+			mainMov.hint_mc.show_btn.visible=true;
+			mainMov.activity.hint_mc.visible=false;
+			mainMov.activity.hint_mc.x=mainMov.hintPosX;
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
+		}
+		//
+		private function hintNext_fn(evt:Event) {
+			hintLen++;
+			var ansLen=String(answer).length;
+			trace("innn ",hintLen,"  ",ansLen);
+			if (hintLen<ansLen) {
+				trace("enterd");
+				if (hintLen==ansLen-1) {
+					mainMov.activity.hint_mc.next_btn.visible=false;
+					mainMov.activity.hint_mc.done_btn.visible=true;
+				}
+				mainMov.activity.hint_mc.x-=50;
+				checkCarry();
+			}
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
+		}
+		//
+		private function checkCarry() {
+			var ansLen=String(answer).length;
+			trace(carry[ansLen-hintLen] + " ---- "+(ansLen-hintLen)+"----"+ansLen + "   "+ hintLen);
+			sub=2;
+			if (ansLen==digLength) {
+				sub=1;
+			}
+			if (carry[ansLen-Number(hintLen+sub)]==1) {
+				mainMov.activity.hint_mc.carry_mc.visible=true;
 			} else {
-				// continue as usual
+				mainMov.activity.hint_mc.carry_mc.visible=false;
 			}
 		}
-		
-		private function stageRemovedFn(e:Event) {
-			try{
-				//mainAct.solution_mc.solloader.mc.scrollDrag=false;
-			}catch(e:Error){
-			}
+		//
+		private function hideHint_fn(evt:Event) {
+			mainMov.hint_mc.hide_btn.visible=false;
+			mainMov.hint_mc.show_btn.visible=true;
+			mainMov.activity.hint_mc.visible=false;
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
 		}
-		private function closeSolutionFn(evt:Event) {
-			mainAct.solution_mc.visible=false;
-			mainAct.solution_btn.mouseEnabled = true;
-			//mainAct.solution_btn.mouseEnabled = true;
+		//
+		private function showHint_fn(evt:Event) {
+			mainMov.hint_mc.hide_btn.visible=true;
+			mainMov.hint_mc.show_btn.visible=false;
+			mainMov.activity.hint_mc.visible=true;
+			mainMov.activity.hint_mc.next_btn.visible=true;
+			mainMov.activity.hint_mc.done_btn.visible=false;
+			hintLen=0;
+			mainMov.activity.hint_mc.x=mainMov.hintPosX;
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
+			checkCarry();
 		}
-		private function solutionDragFn(evt:Event) {
-			var mov=MovieClip(evt.currentTarget.parent);
-			var rect:Rectangle=new Rectangle(intx,inty,800-mov.width,430-mov.height);
-			mainAct.solution_mc.drager.stage.addEventListener(MouseEvent.MOUSE_UP,solutionDropFn);
-			mov.startDrag(false,rect);
+		//
+		private function onSetFocus_fn(evt:Event) {
+			mainMov.stopFbSound();
+			var txtMov=evt.target;
+			txtMov.text="";
+			mainMov.activity.tick.gotoAndStop(1);
+			mainMov.activity.text_msg.gotoAndStop(1);
+			txtMov.defaultTextFormat=textFormat2;
 		}
-		private function solutionDropFn(evt:Event) {
-			var mov=mainAct.solution_mc;
-			mov.stopDrag();
-			//mainAct.solution_mc.solloader.mc.scrollDrag=false;
-			mainAct.solution_mc.drager.stage.removeEventListener(MouseEvent.MOUSE_UP,solutionDropFn);
-		}
-		private function hideQuestionFn() {
-			for (var i=1; i<=totalQuest; i++) {
-				mainAct["q"+i].visible=false;
-			}
-		}
-		private function nextFn(evt:Event) {						
-			if (pointer<totalQuest) {
-				hideQuestionFn();
-				pointer++;
-				mainAct["q"+pointer].visible=true;
-				mainAct._txt.text=pointer+" / "+totalQuest;
-				setActivityPropsFn(mainAct["q"+pointer]);
-				mainAct.solution_mc.solloader.mc.source=dummy;
-			}
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).pnter=pointer
-			if(MovieClip(mainAct["q"+pointer].parent.parent.parent).introPlaying==true){
-				if(!allDone){
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSound();
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopFbSound();
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSnapSound();
-				}
-				if(mainAct.check_btn.alpha==1){
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).playSoundArray([/*"q"+pointer,*/"Q"+pointer+"_"+MovieClip(mainAct["q"+pointer].parent.parent.parent).thisNum]);
-				}
-			}
-			mainAct.prev_btn.alpha=1;
-			mainAct.prev_btn.mouseEnabled=true;
-			mainAct.solution_btn.mouseEnabled = true
-			if (pointer==totalQuest) {
-				mainAct.next_btn.alpha=.5;
-				mainAct.next_btn.mouseEnabled=false;
-			}
-		}
-		private function prevFn(evt:Event) {			
-			if (pointer>1) {
-				hideQuestionFn();
-				pointer--;
-				mainAct["q"+pointer].visible=true;
-				mainAct._txt.text=pointer+" / "+totalQuest;
-				setActivityPropsFn(mainAct["q"+pointer]);
-				mainAct.solution_mc.solloader.mc.source=dummy;
-			}
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).pnter=pointer;
-			if(MovieClip(mainAct["q"+pointer].parent.parent.parent).introPlaying==true){
-				if(!allDone){
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSound();
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopFbSound();
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSnapSound();
-				}
-				if(mainAct.check_btn.alpha==1){
-					MovieClip(mainAct["q"+pointer].parent.parent.parent).playSoundArray([/*"q"+pointer,*/"Q"+pointer+"_"+MovieClip(mainAct["q"+pointer].parent.parent.parent).thisNum]);
-				}
-			}
-			mainAct.next_btn.alpha=1;
-			mainAct.next_btn.mouseEnabled=true;
-			mainAct.solution_btn.mouseEnabled = true
-			if (pointer==1) {
-				mainAct.prev_btn.alpha=.5;
-				mainAct.prev_btn.mouseEnabled=false;
-			}
-		}
-		private function setActivityPropsFn(mov) {
-			mainAct.check_btn.alpha=mov.chkAlpha;
-			mainAct.check_btn.mouseEnabled=mov.chkEnable;
-			mainAct.solution_btn.visible=mov.solutionVisible;
-			mainAct.solution_mc.visible=false;
-		}
-		private function setTextFormat(txt,ansTxt) {
-			var txtChk = String(ansTxt).split("&&")
-			var len
-			if(txtChk.length > 1)
-			{
-				if(String(txtChk[0]).length>String(txtChk[1]).length)
-				{
-					len = String(txtChk[0]).length 
-				}else
-				{
-					len = String(txtChk[1]).length 
-				}
-				
-			}else
-			{
-			len=String(ansTxt).length+1;
-			}
-			//trace(len)
-			var tf:TextFormat = new TextFormat();
-			tf.font="Arial";
-			tf.size=15;
-			tf.align="center";
-			tf.bold="true";
-			if (! isNaN(ansTxt)) {
-				txt.restrict="0-9\\.\\";
-			} else {
-				txt.restrict="0-9 a-z A-Z\\.()/+\\-\\";
-			}
-			txt.setStyle("textFormat", tf);
-			txt.text="?";
-			txt.maxChars=2;
-			if (len>2) {
-				txt.maxChars=len;
-			}
-		}
-		private function removeWhiteSpace(originalstring:String) {
-			var original:Array=originalstring.split(" ");
-			return (original.join(""));
-		}
-		private function checkFn(evt:Event) {
-			var mov=mainAct["q"+pointer];
-			var txt=mov.txt;
-			var pls=mov.plstxt;
-			mov.tick.visible=false;
-			
-			var tempTxt = String(finalAns[pointer-1]).split("&&")
-			var resultChk:Boolean
-			if(tempTxt.length > 1)
-			{
-				if(tempTxt.length==4){
-					resultChk = (removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[0]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[1]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[2]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[3]).toLowerCase() )
-				}else if(tempTxt.length==3){
-					resultChk = (removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[0]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[1]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[2]).toLowerCase() )
-				}else{
-					resultChk = (removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[0]).toLowerCase() || removeWhiteSpace(txt.text).toLowerCase()==removeWhiteSpace(tempTxt[1]).toLowerCase()  )
-				}
-			}else
-			{				
-				resultChk = (removeWhiteSpace(txt.text).toLowerCase()==String(finalAns[pointer-1]).toLowerCase())
-			}
-			//trace(txt.text," == ",finalAns[pointer-1])
-			//trace(resultChk)
-			mov.plstxt.text="";
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).introPlaying=true;
-			if(!allDone){
-				MovieClip(mov.parent.parent.parent).stopFbSound();
-				MovieClip(mov.parent.parent.parent).stopSound();
-				MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSnapSound();
-			}
-			MovieClip(mainAct.parent.parent.parent).introPlaying=true;
-			if (resultChk) {	
-				if(tempTxt.length>1){
-					if(String(txt.text).toLowerCase()=="raffles"){
-						txt.text="Raffles";
-					}
-					else if(String(txt.text).toLowerCase()=="raffles place"){
-						txt.text="Raffles Place";
-					}else if(txt.text==tempTxt[0]){
-						txt.text=tempTxt[0];
-					}else if(txt.text==tempTxt[1]){
-						txt.text=tempTxt[1];
-					}else if(txt.text==tempTxt[2]){
-						txt.text=tempTxt[2];
-					}else if(txt.text==".83" || txt.text==".77"){
-						txt.text=Number(txt.text);
-					}
-					
-					//MovieClip(mov.parent.parent.parent).txt.text=" txt.text "+Number(txt.text);	
-				}else{
-					txt.text=tempTxt;
-				}
-				/*if(String(txt.text).toLowerCase()=="raffles"){
-					txt.text="Raffles";
-				}
-				else if(String(txt.text).toLowerCase()=="raffles place"){
-					txt.text="Raffles Place";
-				}else{
-					
-					//txt.text=tempTxt;
-				}*/								
-				mov.tick.visible=true;
-				mov.tick.gotoAndStop(1);
-				mov.mouseChildren=false;
-				mov.chkAlpha=mainAct.check_btn.alpha;
-				mov.solutionVisible=mainAct.solution_btn.visible;
-				mainAct.check_btn.alpha=.5;
-				mainAct.check_btn.mouseEnabled=false;
-				mov.chkAlpha=mainAct.check_btn.alpha;
-				mov.chkEnable=mainAct.check_btn.mouseEnabled;
-				MovieClip(mainAct.parent).count+=2
-				MovieClip(mainAct.parent.parent).image_mc.visible=true;
-				trace(MovieClip(mainAct.parent).count + " ----CNT ");
-				MovieClip(mainAct.parent.parent).image_mc.inn.gotoAndStop(MovieClip(mainAct.parent).count);
-				MovieClip(mainAct.parent).complete++
-				MovieClip(mov.parent.parent.parent).playFbSound("ting");
-				finalDisplay();
-			} else {
-				if (removeWhiteSpace(txt.text)!=""&&removeWhiteSpace(txt.text)!="?") {
-					mov.attempCnt++;
-					mov.tick.visible=true;
-					MovieClip(mov.parent.parent.parent).playFbSound("wrong");
-					mov.tick.gotoAndStop(2);
-					if (mov.attempCnt==2) {
-						mov.mouseChildren=false;
-						mainAct.check_btn.alpha=.5;
-						mainAct.check_btn.mouseEnabled=false;
-						mainAct.solution_btn.visible=true;
-						mov.chkAlpha=mainAct.check_btn.alpha;
-						mov.chkEnable=mainAct.check_btn.mouseEnabled;
-						mov.solutionVisible=mainAct.solution_btn.visible;	
-						MovieClip(mainAct.parent).complete++
-						finalDisplay();						
-					}
-				}else{
-					MovieClip(mov.parent.parent.parent).playFbSound("pleaseAnswer");
-					mov.plstxt.text="Please Answer.";
-					//MovieClip(mov.parent.parent.parent).txt.text="please Answer";
-				}
-			}
-			mainAct.stage.focus=MovieClip(mainAct.parent).dummy_txt;			
-		}
-		private function solutionFn(evt:Event) {
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).stopFbSound();
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSound();
-			//MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSnapSound();
-			mainAct.solution_btn.mouseEnabled = false
-			mainAct.solution_mc.visible=true;
-			mainAct.solution_mc.solloader.mc.source=solution[pointer-1];
-			mainAct.solution_mc.x=mainAct.solution_mc.px;
-			mainAct.solution_mc.y=mainAct.solution_mc.py;
-			//MovieClip(mainAct.parent).complete++
-			finalDisplay()
-		}
-		public function finalDisplay()
-		{			
-			var complete = MovieClip(mainAct.parent).complete
-			trace(complete + "Check Complete")
-			var cnt = MovieClip(mainAct.parent).count/2
-			if(complete>=5)
-			{
-				//MovieClip(mainAct["q"+pointer].parent.parent.parent).stopFbSound();
-				//MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSound();
-				//trace(cnt +" CHeck CNT")
-				allDone=true;
-				MovieClip(mainAct.parent).result_mc.visible = true
-				if(cnt == 0)
-				{				
-					if(MovieClip(mainAct.parent.parent).done==false){
-						MovieClip(mainAct.parent.parent).done=true;
-						MovieClip(mainAct.parent.parent).playSoundArray(["empty","fb1"]);
-					}
-					MovieClip(mainAct.parent).result_mc.gotoAndStop(1)
-				}else if(cnt <= 2)
-				{					
-					if(MovieClip(mainAct.parent.parent).done==false){
-						MovieClip(mainAct.parent.parent).done=true;
-						MovieClip(mainAct.parent.parent).playSoundArray(["empty","fb2"]);
-					}
-					MovieClip(mainAct.parent).result_mc.gotoAndStop(2)
-				}else if(cnt <=4)
-				{					
-					if(MovieClip(mainAct.parent.parent).done==false){
-						MovieClip(mainAct.parent.parent).done=true;
-						MovieClip(mainAct.parent.parent).playSoundArray(["empty","fb3"]);
-					}
-					MovieClip(mainAct.parent).result_mc.gotoAndStop(3)
-				}else
-				{					
-					if(MovieClip(mainAct.parent.parent).done==false){
-						MovieClip(mainAct.parent.parent).done=true;
-						MovieClip(mainAct.parent.parent).playSoundArray(["empty","fb4"]);
-					}
-					MovieClip(mainAct.parent).result_mc.gotoAndStop(4)
-				}
-			}
-		}
-		public function onSetFocusFn(evt:Event) {
-			var txtMov=evt.currentTarget;
-			MovieClip(mainAct["q"+pointer]).plstxt.text="";
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).stopSnapSound();
-			MovieClip(mainAct["q"+pointer].parent.parent.parent).stopFbSound();
-			if (txtMov.text=="?" || txtMov.text !="") {
-				txtMov.text="";
-			}
-			MovieClip(txtMov.parent).tick.gotoAndStop(3);
-		}
-		public function onKillFocusFn(evt:Event) {
+		//
+		private function onKillFocus_fn(evt:Event) {
 			var txtMov=evt.target;
 			if (txtMov.text=="") {
 				txtMov.text="?";
+				txtMov.setTextFormat(textFormat1);
 			}
-			//MovieClip(txtMov.parent).tick.gotoAndStop(3);
 		}
+		//
+		private function onSetFocusCarry_fn(evt:Event) {
+			var txtMov=evt.target;
+			txtMov.text="";
+		}
+		//
+		private function onKillFocusCarry_fn(evt:Event) {
+			var txtMov=evt.target;
+			if (txtMov.text=="") {
+				txtMov.text="";
+			}
+		}
+		//
+		private function check_fn(evt:Event) {
+			mainMov.stopSound();
+			mainMov.stopFbSound();
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
+			//
+			var ansLength=String(answer).length;
+			var InPutAnswer:Array=[];
+			//
+			for (var i=8; i>=1; i--) {
+				InPutAnswer.push(mainMov.activity["a"+i].text);
+			}
+			//
+			trace(InPutAnswer +" inputans ")
+			
+			var finAnswer=InPutAnswer.join("");
+			
+			trace(finAnswer + " Entered "+ answer);
+			//
+			if (finAnswer=="????????"||finAnswer=="???????"||finAnswer=="??????"||finAnswer=="?????") {
+				//do nothing....
+				mainMov.activity.tick.gotoAndStop(1);
+				mainMov.activity.text_msg.gotoAndStop("planswer");
+				mainMov.playFbSound("plzAnswer");
+			} else if (finAnswer==answer) {
+				mainMov.playFbSound("right");
+				mainMov.playFbSound("wellDone");
+				mainMov.hint_mc.visible=false;
+				mainMov.next_btn.visible=true;
+				mainMov.activity.tick.gotoAndStop("correct");
+				mainMov.activity.text_msg.gotoAndStop(1);
+				mainMov.check_btn.mouseEnabled=false;
+				for (i=1; i<=8; i++) {
+					if(mainMov.activity["a"+i].text=="?")
+					{
+						mainMov.activity["a"+i].text="";
+					}
+					mainMov.activity["a"+i].mouseEnabled=false;
+					if (i<=7) {
+						mainMov.activity["c"+i].mouseEnabled=false;
+					}
+				}
+				mainMov.activity.hint_mc.visible = false;
+				mainMov.answer_btn.visible=false;
+				mainMov.answer_btn.alpha=.15;
+				mainMov.answer_btn.mouseEnabled=false;
+				mainMov.answer_btn.removeEventListener(MouseEvent.CLICK,showAnswer_fn);
+			} else {
+				mainMov.answer_btn.visible=true;
+				mainMov.answer_btn.alpha=1;
+				mainMov.answer_btn.mouseEnabled=true;
+				mainMov.answer_btn.addEventListener(MouseEvent.CLICK,showAnswer_fn);
+				mainMov.activity.tick.gotoAndStop("incorrect");
+				mainMov.activity.text_msg.gotoAndStop("tryagain");
+				mainMov.playFbSound("tryAgain");
+				mainMov.playFbSound("wrong");
+			}
+		}
+		//
+		private function getFrameEnd(evt:Event) {
+			var mov=evt.currentTarget;
+			if (mov.currentFrame==mov.totalFrames) {
+				mov.removeEventListener(Event.ENTER_FRAME,getFrameEnd);
+				reset_fn();
+				setQuestion();
+			}
+		}
+		//
+
+		private function next_fn(evt:Event=null) {
+			mainMov.playSnapSound("paperFlip");
+			mainMov.activity.notebook.gotoAndPlay(2);
+			mainMov.activity.notebook.addEventListener(Event.ENTER_FRAME,getFrameEnd);
+			mainMov.next_btn.mouseEnabled=false;
+			mainMov.stopFbSound();
+			
+		}
+		//
+		private function setQuestion(evt:Event=null) {
+			try {
+				reset_fn();
+				pageNumber++;
+				mainMov.activity.pgNo_txt.text=pageNumber;
+				if (pageNumber>1000) {
+					pageNumber=1;
+				}
+				answer=10000;
+				carryOver = randomBetween(1,2)
+				trace("innn " + carryOver)
+				if (carryOver==1) {
+					//do {
+					addend1[0]=Math.round(1000000+Math.random()*8999999);
+					addend2[0]=Math.round(1000000+Math.random()*8999999);
+					answer=Number(addend1[0])+Number(addend2[0]);
+					var len=String(answer).length;
+					//} while (len >digLength);
+				} else {
+					var val1="";
+					var val2="";
+					for (var i=1; i<=digLength; i++) {
+						if (i==1) {
+							var m1=randomBetween(1,9);
+						} else {
+							m1=randomBetween(0,9);
+						}
+						var m2=randomBetween(0,9-m1);
+						m3=m1-m2;
+						val1+=m1;
+						val2+=m2;
+					}
+					addend1[0]=val1;
+					addend2[0]=val2;
+					answer=Number(addend1[0])+Number(addend2[0]);
+					len=String(answer).length;
+				}
+				trace(answer)
+				//
+				//trace(addend1[0]+ "  " + addend2[0] +"   " + answer+" answer "+digLength);
+				//
+				for (i=1; i<=digLength+1; i++) {
+					if (i>len) {
+						mainMov.activity["a"+i].text="";
+						mainMov.activity["a"+i].selectable=false;
+						mainMov.activity["a"+i].mouseEnabled=false;
+					} else {
+						mainMov.activity["a"+i].text="?";
+						mainMov.activity["a"+i].selectable=true;
+						mainMov.activity["a"+i].mouseEnabled=true;
+					}
+				}
+				
+				//
+				for (num=1; num<=2; num++) {
+					this["addend"+num][1]=Math.floor(this["addend"+num][0]/1000000);
+					this["addend"+num][0]-=this["addend"+num][1]*1000000;
+					this["addend"+num][2]=Math.floor(this["addend"+num][0]/100000);
+					this["addend"+num][0]-=this["addend"+num][2]*100000;
+					this["addend"+num][3]=Math.floor(this["addend"+num][0]/10000);
+					this["addend"+num][0]-=this["addend"+num][3]*10000;
+					this["addend"+num][4]=Math.floor(this["addend"+num][0]/1000);
+					this["addend"+num][0]-=this["addend"+num][4]*1000;
+					this["addend"+num][5]=Math.floor(this["addend"+num][0]/100);
+					this["addend"+num][0]-=this["addend"+num][5]*100;
+					this["addend"+num][6]=Math.floor(this["addend"+num][0]/10);
+					this["addend"+num][0]-=this["addend"+num][6]*10;
+					this["addend"+num][7]=Math.floor(this["addend"+num][0]/1);
+					this["addend"+num][0]-=this["addend"+num][7]*1;
+					if (this["addend"+num][0]!=0) {
+						//trace("Error in addend "+num);
+					}
+				}
+				//
+				for (digit=len+1; digit>=0; digit--) {
+					carry[digit-1]=0;
+					//trace(this.addend1[digit]+" llllllllll "+this.addend2[digit]+" ----- "+carry[digit-1]);
+					answerRow[digit]=this.addend1[digit]+this.addend2[digit]+carry[digit];
+					//trace(answerRow[digit]);
+					if (answerRow[digit]>9) {
+						answerRow[digit]-=10;
+						carry[digit-1]+=1;
+					}
+				}
+				trace("innn");
+				//
+				for (var num1=1; num1<=2; num1++) {
+					if (this["addend"+num1][1]==0) {
+						this["addend"+num1][1]="";
+						if (this["addend"+num1][2]==0) {
+							this["addend"+num1][2]="";
+							if (this["addend"+num1][3]==0) {
+								this["addend"+num1][3]="";
+								if (this["addend"+num1][4]==0) {
+									this["addend"+num1][4]="";
+									if (this["addend"+num1][5]==0) {
+										this["addend"+num1][5]="";
+										if (this["addend"+num1][6]==0) {
+											//trace("Oh dear, addend"+num1+"=0000. That's not meant to happen.");
+											setQuestion();
+										}
+									}
+								}
+							}
+						}
+					}
+					for (digit=1; digit<=digLength; digit++) {
+						mainMov.activity["r"+num1+""+digit].text=this["addend"+num1][digit];
+						mainMov.activity.answer_mc["r"+num1+""+digit].text=this["addend"+num1][digit];
+					}
+				}
+
+			} catch (e:Error) {
+				trace(e);
+			}
+			//
+			setAnswer();
+		}
+		//
+		private function reset_fn(evt:Event=null) {
+			for (var i=1; i<=digLength+1; i++) {
+				mainMov.activity["a"+i].text="?";
+				mainMov.activity["a"+i].defaultTextFormat=textFormat1;
+				if (i<=digLength) {
+					for (var j=1; j<=2; j++) {
+						mainMov.activity["r"+j+""+i].text="?";
+					}
+				}
+				if (i<=digLength) {
+					mainMov.activity["c"+i].text="";
+					mainMov.activity["c"+i].mouseEnabled=true;
+				}
+				if (i<=digLength) {
+					mainMov.activity.answer_mc["carryDigit"+Number(i-1)].gotoAndStop(1);
+				}
+				mainMov.activity["a"+i].mouseEnabled=true;
+			}
+			mainMov.activity.tick.gotoAndStop(1);
+			mainMov.activity.text_msg.gotoAndStop(1);
+			mainMov.hint_mc.visible=true;
+			mainMov.next_btn.visible=false;
+			mainMov.next_btn.mouseEnabled=true;
+			mainMov.answer_btn.visible=false;
+			mainMov.answer_btn.mouseEnabled=false;
+			mainMov.answer_btn.alpha=.15;
+			mainMov.answer_btn.removeEventListener(MouseEvent.CLICK,showAnswer_fn);
+			mainMov.activity.answer_mc.visible=false;
+			mainMov.hint_mc.hide_btn.visible=false;
+			mainMov.hint_mc.show_btn.visible=true;
+			mainMov.activity.hint_mc.visible=false;
+			mainMov.activity.hint_mc.done_btn.visible=false;
+			mainMov.activity.hint_mc.next_btn.visible=true;
+			mainMov.check_btn.mouseEnabled=true;
+			mainMov.activity.hint_mc.x=mainMov.hintPosX;
+			hintLen=0;
+		}
+		//
+		private function showAnswer_fn(evt:Event) {
+			for (var i=1; i<=digLength; i++) {
+				mainMov.activity["a"+i].mouseEnabled=false;
+				mainMov.activity["c"+i].mouseEnabled=false;
+			}
+			mainMov.activity["a"+8].mouseEnabled = false;//sss
+			mainMov.activity.hint_mc.visible = false;//sss
+			
+			mainMov.activity.answer_mc.visible=true;
+			mainMov.hint_mc.visible=false;
+			mainMov.next_btn.visible=true;
+			mainMov.check_btn.mouseEnabled=false;
+			mainMov.stopFbSound();
+			mainMov.activity.text_msg.gotoAndStop(1);
+			mainMov.answer_btn.visible=false;
+			mainMov.answer_btn.alpha=.15;
+			mainMov.answer_btn.mouseEnabled=false;
+			mainMov.answer_btn.removeEventListener(MouseEvent.CLICK,showAnswer_fn);
+			mainMov.stage.focus=mainMov.activity.dummy_txt;
+			
+		}
+		//
+		private function setAnswer() {
+			for (digit=0; digit<=digLength; digit++) {
+				if (digit==1) {
+					mainMov.activity.answer_mc["answerDigit"+digit].gotoAndStop(answerRow[digit]+2);
+					if (carry[digit]==1) {
+						mainMov.activity.answer_mc["carryDigit"+digit].gotoAndStop(carry[digit]+2);
+					}
+				}else {
+					mainMov.activity.answer_mc["answerDigit"+digit].gotoAndStop(answerRow[digit]+2);
+					if (carry[digit]==1) {
+						mainMov.activity.answer_mc["carryDigit"+digit].gotoAndStop(carry[digit]+2);
+					}
+				}
+				if (mainMov.activity.answer_mc["answerDigit"+0].currentFrame==2) {
+					mainMov.activity.answer_mc["answerDigit"+0].gotoAndStop(1);
+				}
+			}
+		}
+		//
 	}
 }
+//

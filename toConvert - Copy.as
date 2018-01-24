@@ -3,7 +3,8 @@
 	import flash.events.*;
 	import flash.text.*;
 	import flash.geom.Rectangle;
-	public class MainFillSimple {
+	public class MainFillSimple extends MovieClip
+	{
 		private var mainAct:MovieClip;
 		private var finalAns:Array = new Array();
 		private var solution:Array = new Array();
@@ -15,23 +16,25 @@
 		private var intx;
 		private var inty;
 		private var allDone:Boolean=false;
+
 		public function MainFillSimple(mv,ans,sol) {
 			trace("innn23");
 			mainAct=mv;
 			finalAns=ans;
 			solution=sol;
 			totalQuest=finalAns.length;
-			MovieClip(mainAct.parent).complete = 0
+			MovieClip(mainAct.parent).complete = 0;
 			trace(mv.name);
 			for (var i=1; i<=totalQuest; i++) {
 				trace("innn " + mainAct["q"+i]);
 				mainAct["q"+i].visible=false;
 				var txt=mainAct["q"+i].txt;
 				setTextFormat(txt,finalAns[i-1]);
-				//txt.addEventListener(TextEvent.TEXT_INPUT, checkBeforeAdding);
+				txt.addEventListener(TextEvent.TEXT_INPUT, checkBeforeAdding);
 				txt.addEventListener(FocusEvent.FOCUS_IN,onSetFocusFn);
 				txt.addEventListener(FocusEvent.FOCUS_OUT,onKillFocusFn);
 				mainAct["q"+i].tick.gotoAndStop(3);
+				mainAct["q"+i].tick.gotoAndStop("none");
 				mainAct["q"+i].attempCnt=0;
 				mainAct["q"+i].chkAlpha=1;
 				mainAct["q"+i].solutionVisible=false;
@@ -261,10 +264,7 @@
 						txt.text=Number(txt.text);
 					}
 					
-					//MovieClip(mov.parent.parent.parent).txt.text=" txt.text "+Number(txt.text);
-					
-					
-					
+					//MovieClip(mov.parent.parent.parent).txt.text=" txt.text "+Number(txt.text);	
 				}else{
 					txt.text=tempTxt;
 				}
