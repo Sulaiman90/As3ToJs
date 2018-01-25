@@ -1,5 +1,21 @@
-$source = "toConvert.as"
-$dest = "Converted.js"
+# Determine script location for PowerShell
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
+ 
+# Write-Host "Current script directory is $ScriptDir"
+
+# PowerShell script to list the files 
+$Dir = get-childitem $ScriptDir
+
+$FullName = $Dir | where {$_.extension -eq ".as"}
+
+$FileNameWithExt = $FullName -split '\.'
+
+$FileName = $FileNameWithExt[0]
+
+Write-Host "As files in Current script directory are $FileName"
+
+$source = $FullName
+$dest = $FileName+".js"
 
 #Get content from file
 $file = Get-Content $source | Out-String
