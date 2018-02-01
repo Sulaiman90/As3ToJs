@@ -85,7 +85,6 @@ Function Convert($FullName){
 
 	echo "params: $constArgs" 
 		
-
 	$raw = Get-Content -Path $dest | Out-String
 	[void]($raw -match "(?m)^(\s+)class")
 	$leadingSpacesToRemove = $Matches[1].Length
@@ -94,9 +93,13 @@ Function Convert($FullName){
 
 	$rawNew = Get-Content -Path $dest | Out-String
 
-	$rawNew -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' -replace "(?s)function (\w+)(.*)}", 
-					  "function `$1`$2 `n this.$result($constArgs); `n}" | 
-	Set-Content $dest 
+	$rawNew -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest 
+
+	if($constArgs){
+		$rawNew -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | 
+		Set-Content $dest 
+	}
+
 
 }
 
