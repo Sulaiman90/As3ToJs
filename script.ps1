@@ -10,7 +10,7 @@ Function Convert($FullName){
 	#Get content from file
 	$file = Get-Content $source | Out-String
 
-	#Regex pattern to compare two strings when extends used
+	#Regex pattern to get the class name
 	$pattern = "(?s)class(.*?){"
 
 	#Perform the operation
@@ -25,6 +25,14 @@ Function Convert($FullName){
 	$result = $className[0]
 
 	#echo "name: $result" 
+
+	#Get the class constructor parameters
+	$pattern2 = "(?s)function $result\((.*?)\)"
+
+	#Perform the operation
+	$constArgs = [regex]::Match($file,$pattern2).Groups[1].Value.trim()
+
+	#echo "params: $constArgs" 
 
 	#Replace the class constructor
 	$file -replace "function $result\(" , "this.$result = function(" | Set-Content $dest
@@ -75,9 +83,14 @@ Function Convert($FullName){
 	$raw = Get-Content -Path $dest | Out-String
 	[void]($raw -match "(?m)^(\s+)class")
 	$leadingSpacesToRemove = $Matches[1].Length
-	$raw -replace "(?sm).*?class (\w+)(.*)}",'function $1()$2' -replace "(?m)^\s{$leadingSpacesToRemove}" | Set-Content $dest
+	$raw -replace "(?sm).*?class (\w+)(.*)}","function `$1($constArgs)`$2" -replace "(?m)^\s{$leadingSpacesToRemove}" | 
+	Set-Content $dest
 
-	(Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest
+	(Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest 
+
+	$rawNew = Get-Content -Path $dest | Out-String
+	$rawNew -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | Set-Content $dest 
+
 }
 
 
@@ -94,7 +107,6 @@ $ASFiles = $Dir | where {$_.extension -eq ".as"}
 echo "name: $ASFiles" 
 
 Foreach ($file in $ASFiles){
-
 	Convert ($file)
 }
 

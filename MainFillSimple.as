@@ -17,7 +17,8 @@
 		private var inty;
 		private var allDone:Boolean=false;
 
-		public function MainFillSimple(mv,ans,sol) {
+		public function MainFillSimple(mv,ans,sol) 
+		{
 			trace("innn23");
 			mainAct=mv;
 			finalAns=ans;
