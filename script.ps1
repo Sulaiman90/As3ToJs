@@ -40,6 +40,7 @@ Function Convert($FullName){
 	(Get-Content $dest | Out-String) | ForEach-Object {
 			 $_ -creplace "private" , "" `
 			 	-creplace "public" , "" `
+			 	-creplace "static" , "" `
 			 	-creplace ":Array = new Array\(\)" , "=[]" `
 			 	-creplace ":Array = new Array" , "=[]" `
 			 	-creplace ":MovieClip" , "" `
