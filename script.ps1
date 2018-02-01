@@ -26,14 +26,6 @@ Function Convert($FullName){
 
 	#echo "name: $result" 
 
-	#Get the class constructor parameters
-	$pattern2 = "(?s)function $result\((.*?)\)"
-
-	#Perform the operation
-	$constArgs = [regex]::Match($file,$pattern2).Groups[1].Value.trim()
-
-	#echo "params: $constArgs" 
-
 	#Replace the class constructor
 	$file -replace "function $result\(" , "this.$result = function(" | Set-Content $dest
 
@@ -82,6 +74,17 @@ Function Convert($FullName){
 				-creplace ".*addEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.addEventListener("tick"' `
 				-creplace ".*removeEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.removeEventListener("tick"'
 			} | Set-Content $dest
+
+	$file2 = Get-Content -Path $dest | Out-String
+
+	#Get the class constructor parameters
+	$pattern2 = "(?s)function\((.*?)\)"
+
+	#Perform the operation
+	$constArgs = [regex]::Match($file2,$pattern2).Groups[1].Value.trim()
+
+	echo "params: $constArgs" 
+		
 
 	$raw = Get-Content -Path $dest | Out-String
 	[void]($raw -match "(?m)^(\s+)class")
