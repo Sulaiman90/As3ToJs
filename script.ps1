@@ -86,13 +86,13 @@ Function Convert($FullName){
 	$raw = Get-Content -Path $dest | Out-String
 	[void]($raw -match "(?m)^(\s+)class")
 	$leadingSpacesToRemove = $Matches[1].Length
-	$raw -replace "(?sm).*?class (\w+)(.*)}","function `$1($constArgs)`$2" -replace "(?m)^\s{$leadingSpacesToRemove}" | 
+	$raw -replace "(?sm).*?class (\w+)(.*)}","function `$1($constArgs)`$2" -replace "(?m)^\s{$leadingSpacesToRemove}" |
 	Set-Content $dest
 
-	(Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest 
-
 	$rawNew = Get-Content -Path $dest | Out-String
-	$rawNew -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | 
+
+	$rawNew -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' -replace "(?s)function (\w+)(.*)}", 
+					  "function `$1`$2 `n this.$result($constArgs); `n}" | 
 	Set-Content $dest 
 
 }
