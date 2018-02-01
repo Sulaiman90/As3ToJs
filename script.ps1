@@ -77,7 +77,9 @@ Function Convert($FullName){
 			 	-replace "buttonMode=false", 'cursor="null"' `
 			 	-replace '.*import(.+)', '' `
 				-replace '(?s)extends.*?{' , '{' `
-				-creplace "=new TextFormat" , "" 
+				-creplace "=new TextFormat" , "" `
+				-creplace ".*addEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.addEventListener("tick"' `
+				-creplace ".*removeEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.removeEventListener("tick"'
 			} | Set-Content $dest
 
 	$raw = Get-Content -Path $dest | Out-String
@@ -87,9 +89,6 @@ Function Convert($FullName){
 	Set-Content $dest
 
 	(Get-Content $dest) -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest 
-
-	$rawNew = Get-Content -Path $dest | Out-String
-	$rawNew -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | Set-Content $dest 
 
 }
 
