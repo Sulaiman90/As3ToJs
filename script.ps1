@@ -95,11 +95,12 @@ Function Convert($FullName){
 
 	$rawNew -creplace 'gotoAndStopFrame\("', 'gotoAndStop("' | Set-Content $dest 
 
+	$finalRaw = Get-Content -Path $dest | Out-String
+
 	if($constArgs){
-		$rawNew -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | 
+		$finalRaw -replace "(?s)function (\w+)(.*)}", "function `$1`$2 `n this.$result($constArgs); `n}" | 
 		Set-Content $dest 
 	}
-
 
 }
 
