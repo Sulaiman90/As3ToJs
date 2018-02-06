@@ -53,8 +53,8 @@ Function Convert($FullName){
 			 	-creplace "gotoAndPlay" , "gotoAndPlayFrame" `
 			 	-creplace "MouseEvent.CLICK" , '"click"' `
 				-creplace "MouseEvent.MOUSE_DOWN" , '"mousedown"' `
-				-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
 				-creplace "MouseEvent.MOUSE_OVER" , '"mouseover"' `
+				-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
 				-creplace "MouseEvent.MOUSE_OUT" , '"mouseout"' `
 				-creplace ":Error" , "" `
 				-creplace ":Event" , "" `
