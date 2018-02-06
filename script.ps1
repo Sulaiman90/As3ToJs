@@ -71,8 +71,8 @@ Function Convert($FullName){
 			 	-creplace '.*stopBgSound', 'stopBgSound' `
 			 	-creplace "enabled" , "mouseEnabled" `
 			 	-creplace "currentFrameLabel" , "currentLabel" `
-			 	-replace "buttonMode=true", 'cursor="pointer"' `
-			 	-replace "buttonMode=false", 'cursor="null"' `
+			 	-replace '(?s)buttonMode.*?true' , 'cursor="pointer"' `
+			 	-replace '(?s)buttonMode.*?false' , 'cursor="null"' `
 			 	-replace '.*import(.+)', '' `
 				-replace '(?s)extends.*?{' , '{' `
 				-creplace "=new TextFormat" , "" `
@@ -108,7 +108,6 @@ Function Convert($FullName){
 		Set-Content $dest 
 	}
 }
-
 
 # Determine script location for PowerShell
 $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
