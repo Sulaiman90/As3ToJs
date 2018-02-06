@@ -67,6 +67,8 @@ Function Convert($FullName){
 			 	-creplace '.*playSound', "playSound" `
 			 	-creplace '.*playFbSound', "playFbSound" `
 			 	-creplace '.*playSnapSound', 'playSound' `
+			 	-creplace '.*playBgSound', 'playBgSound' `
+			 	-creplace '.*stopBgSound', 'stopBgSound' `
 			 	-creplace "enabled" , "mouseEnabled" `
 			 	-creplace "currentFrameLabel" , "currentLabel" `
 			 	-replace "buttonMode=true", 'cursor="pointer"' `
