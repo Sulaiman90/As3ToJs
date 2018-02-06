@@ -33,8 +33,6 @@ Function Convert($FullName){
 			 $_ -creplace "private" , "" `
 			 	-creplace "public" , "" `
 			 	-creplace "static" , "" `
-			 	-creplace ":Array = new Array\(\)" , "=[]" `
-			 	-creplace ":Array = new Array" , "=[]" `
 			 	-creplace ":MovieClip" , "" `
 			 	-creplace "MovieClip" , "" `
 				 -replace ":.*?(=)", '='	`
@@ -42,6 +40,7 @@ Function Convert($FullName){
 				-creplace ":uint" , "" `
 				-creplace ":int" , "" `
 				-creplace ":void" , "" `
+				-creplace ":DisplayObject" , "" `
 				-creplace ":Number" , "" `
 				-creplace ":String" , "" `
 				-creplace ":Array" , "" `
@@ -55,6 +54,8 @@ Function Convert($FullName){
 			 	-creplace "MouseEvent.CLICK" , '"click"' `
 				-creplace "MouseEvent.MOUSE_DOWN" , '"mousedown"' `
 				-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
+				-creplace "MouseEvent.MOUSE_OVER" , '"mouseover"' `
+				-creplace "MouseEvent.MOUSE_OUT" , '"mouseout"' `
 				-creplace ":Error" , "" `
 				-creplace ":Event" , "" `
 				-creplace ":MouseEvent" , ""  `
@@ -74,7 +75,8 @@ Function Convert($FullName){
 				-replace '(?s)extends.*?{' , '{' `
 				-creplace "=new TextFormat" , "" `
 				-creplace ".*addEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.addEventListener("tick"' `
-				-creplace ".*removeEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.removeEventListener("tick"'
+				-creplace ".*removeEventListener\(Event.ENTER_FRAME", 'createjs.Ticker.removeEventListener("tick"' `
+				-creplace ":GlowFilter" , "" 
 			} | Set-Content $dest
 
 	$file2 = Get-Content -Path $dest | Out-String
