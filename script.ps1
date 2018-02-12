@@ -35,15 +35,16 @@ Function Convert($FullName){
 			 	-creplace "static" , "" `
 			 	-creplace ":MovieClip" , "" `
 			 	-creplace "MovieClip" , "" `
-				 -replace ":.*?(=)", '='	`
 				-creplace ":Boolean" , "" `
 				-creplace ":uint" , "" `
 				-creplace ":int" , "" `
-				-creplace ":void" , "" `
-				-creplace ":DisplayObject" , "" `
+				-creplace "int" , "" `
 				-creplace ":Number" , "" `
 				-creplace ":String" , "" `
 				-creplace ":Array" , "" `
+				-creplace ":void" , "" `
+				-replace ":.*?(=)", '='	`
+				-creplace ":DisplayObject" , "" `
 			 	-creplace "FocusEvent.FOCUS_IN" , '"focusin"' `
 			 	-creplace "FocusEvent.FOCUS_OUT" , '"focusout"' `
 			 	-creplace "focusIn" , "focusin" `
