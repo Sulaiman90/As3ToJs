@@ -57,11 +57,14 @@ Function Convert($FullName){
 				-creplace "MouseEvent.MOUSE_OVER" , '"mouseover"' `
 				-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
 				-creplace "MouseEvent.MOUSE_OUT" , '"mouseout"' `
+				-creplace "TimerEvent.TIMER" , '"timer"' `
+				-creplace "TimerEvent.TIMER_COMPLETE" , '"complete"' `
 				-creplace ":Error" , "" `
 				-creplace ":Event" , "" `
 				-creplace ":MouseEvent" , ""  `
 				-creplace ":TextEvent" , ""  `
 				-creplace ":FocusEvent" , ""  `
+				-creplace ":TimerEvent" , ""  `
 				-replace '.*stopSound', "stopSound" `
 			 	-creplace '.*stopFbSound', "stopFbSound" `
 			 	-creplace '.*stopSnapSound', "stopSnapSound" `
