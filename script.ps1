@@ -71,8 +71,8 @@ Function Convert($FullName){
 			 	-creplace '.*stopBgSound', 'stopBgSound' `
 			 	-creplace "enabled" , "mouseEnabled" `
 			 	-creplace "currentFrameLabel" , "currentLabel" `
-			 	-replace '(?s)buttonMode.*?true' , 'cursor="pointer"' `
-			 	-replace '(?s)buttonMode.*?false' , 'cursor="null"' `
+			 	-replace 'buttonMode.*?true' , 'cursor="pointer"' `
+			 	-replace 'buttonMode.*?false' , 'cursor="null"' `
 			 	-replace '.*import(.+)', '' `
 				-replace '(?s)extends.*?{' , '{' `
 				-creplace "=new TextFormat" , "" `
@@ -124,4 +124,3 @@ echo "name: $ASFiles"
 Foreach ($file in $ASFiles){
 	Convert ($file)
 }
-
