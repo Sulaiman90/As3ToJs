@@ -50,6 +50,7 @@ Function Convert($FullName){
 			 	-creplace "focusIn" , "focusin" `
 			 	-creplace "focusOut" , "focusout" `
 			 	-creplace "TextEvent.TEXT_INPUT" , '"change"' `
+			 	-creplace "Event.CHANGE" , '"change"' `
 			 	-creplace 'gotoAndStop', 'gotoAndStopFrame' `
 			 	-creplace "gotoAndPlay" , "gotoAndPlayFrame" `
 			 	-creplace "MouseEvent.CLICK" , '"click"' `
