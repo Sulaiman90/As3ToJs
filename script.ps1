@@ -38,7 +38,6 @@ Function Convert($FullName){
 				-creplace ":Boolean" , "" `
 				-creplace ":uint" , "" `
 				-creplace ":int" , "" `
-				-creplace "int" , "" `
 				-creplace ":Number" , "" `
 				-creplace ":String" , "" `
 				-creplace ":Array" , "" `
@@ -129,3 +128,4 @@ echo "name: $ASFiles"
 Foreach ($file in $ASFiles){
 	Convert ($file)
 }
+
