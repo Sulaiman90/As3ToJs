@@ -57,8 +57,8 @@ Function Convert($FullName){
 				-creplace "MouseEvent.MOUSE_OVER" , '"mouseover"' `
 				-creplace "MouseEvent.MOUSE_UP" , '"pressup"' `
 				-creplace "MouseEvent.MOUSE_OUT" , '"mouseout"' `
-				-creplace "TimerEvent.TIMER" , '"timer"' `
 				-creplace "TimerEvent.TIMER_COMPLETE" , '"complete"' `
+				-creplace "TimerEvent.TIMER" , '"timer"' `
 				-creplace ":Error" , "" `
 				-creplace ":Event" , "" `
 				-creplace ":MouseEvent" , ""  `
