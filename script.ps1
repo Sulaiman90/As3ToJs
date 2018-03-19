@@ -74,8 +74,8 @@ Function Convert($FullName){
 			 	-creplace '.*playBgSound', 'playBgSound' `
 			 	-creplace '.*stopBgSound', 'stopBgSound' `
 			 	-creplace "enabled" , "mouseEnabled" `
-			 	-creplace "currentFrame" , "_currentframe()" `
-			 	-creplace "currentFrameLabel" , "currentLabel" `
+				-creplace "currentFrameLabel" , "currentLabel" `
+				-creplace "currentFrame" , "_currentframe()" `
 			 	-replace 'buttonMode.*?true' , 'cursor="pointer"' `
 			 	-replace 'buttonMode.*?false' , 'cursor="null"' `
 			 	-replace '.*import(.+)', '' `
